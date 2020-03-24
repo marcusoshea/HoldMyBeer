@@ -88,17 +88,13 @@ namespace WebApi.Controllers
             }
         }
 
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            var users = _userService.GetAll();
-            var model = _mapper.Map<IList<UserModel>>(users);
-            return Ok(model);
-        }
-
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
+            if (User.Identity.Name != id.ToString())
+            {
+                return BadRequest(new { message = "Attempted to access a different user" });
+            }
             var user = _userService.GetById(id);
             var model = _mapper.Map<UserModel>(user);
             return Ok(model);
@@ -107,6 +103,10 @@ namespace WebApi.Controllers
         [HttpPut("{id}")]
         public IActionResult Update(int id, [FromBody]UpdateModel model)
         {
+            if (User.Identity.Name != id.ToString())
+            {
+                return BadRequest(new { message = "Attempted to update a different user" });
+            }
             // map model to entity and set id
             var user = _mapper.Map<User>(model);
             user.Id = id;
@@ -127,8 +127,13 @@ namespace WebApi.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
+            if (User.Identity.Name != id.ToString())
+            {
+                return BadRequest(new { message = "Attempted to delete a different user" });
+            }
             _userService.Delete(id);
             return Ok();
         }
+
     }
 }
