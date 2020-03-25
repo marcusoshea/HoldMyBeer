@@ -15,10 +15,10 @@ namespace WebApi.Helpers
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            // connect to sql server database
             options.UseNpgsql(Configuration.GetConnectionString("DbContext"));
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Beer> Beers { get; set; }
     }
 }

@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebApi.Helpers;
 
-namespace WebApi.Migrations.SqlServerMigrations
+namespace WebApi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20200321013505_InitialEntities")]
-    partial class InitialEntities
+    [Migration("20200325031623_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,6 +20,33 @@ namespace WebApi.Migrations.SqlServerMigrations
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
                 .HasAnnotation("ProductVersion", "3.1.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            modelBuilder.Entity("WebApi.Entities.Beer", b =>
+                {
+                    b.Property<int>("BeerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("BeerDescription")
+                        .HasColumnType("text");
+
+                    b.Property<string>("BeerImageLink")
+                        .HasColumnType("text");
+
+                    b.Property<string>("BeerName")
+                        .HasColumnType("text");
+
+                    b.Property<int>("BeerRating")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("BeerId");
+
+                    b.ToTable("Beers");
+                });
 
             modelBuilder.Entity("WebApi.Entities.User", b =>
                 {
