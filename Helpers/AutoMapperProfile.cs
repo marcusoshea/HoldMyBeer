@@ -14,7 +14,7 @@ namespace WebApi.Helpers
             CreateMap<UpdateModel, User>();
             CreateMap<Beer, BeerModel>();
             CreateMap<AddBeerModel, Beer>();
-            CreateMap<UpdateModel, Beer>();
+            CreateMap<UpdateBeerModel, Beer>();
         }
     }
 }

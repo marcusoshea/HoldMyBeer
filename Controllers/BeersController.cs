@@ -42,21 +42,54 @@ namespace WebApi.Controllers
             return Ok(model);
         }
 
-        [HttpPost("add")]
-        public IActionResult Add([FromBody]AddBeerModel model)
+        [HttpPost("add/{id}")]
+        public IActionResult Add(int id, [FromBody]AddBeerModel model)
         {
             // map model to entity
             var beer = _mapper.Map<Beer>(model);
+
             if (User.Identity.Name == null)
             {
                 return BadRequest(new { message = "User token error" });
             }
+            if (User.Identity.Name != id.ToString())
+            {
+                return BadRequest(new { message = "Attempted to add beer to a different user" });
+            }
+            
             beer.UserId = int.Parse(User.Identity.Name);
 
             try
             {
                 // create Beer
                 _beerService.Add(beer);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                // return error message if there was an exception
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("update/{id}")]
+        public IActionResult Update(int id, [FromBody]UpdateBeerModel model)
+        {
+            var beer = _mapper.Map<Beer>(model);
+
+            if (User.Identity.Name == null)
+            {
+                return BadRequest(new { message = "User token error" });
+            }
+            if (User.Identity.Name != id.ToString())
+            {
+                return BadRequest(new { message = "Attempted to update beer of wrong user" });
+            }
+
+            try
+            {
+                // update beer 
+                _beerService.Update(beer);
                 return Ok();
             }
             catch (AppException ex)

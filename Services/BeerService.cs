@@ -8,11 +8,9 @@ namespace WebApi.Services
 {
     public interface IBeerService
     {
-        User Authenticate(string username, string password);
         Beer GetById(int userId, int beerId);
-
-        Beer Add(Beer user);
-        void Update(User user, string password = null);
+        Beer Add(Beer beer);
+        void Update(Beer beer);
         void Delete(int id);
     }
 
@@ -23,25 +21,6 @@ namespace WebApi.Services
         public BeerService(DataContext context)
         {
             _context = context;
-        }
-
-        public User Authenticate(string username, string password)
-        {
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
-                return null;
-
-            var user = _context.Users.SingleOrDefault(x => x.Username == username);
-
-            // check if username exists
-            if (user == null)
-                return null;
-
-            // check if password is correct
-            if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
-                return null;
-
-            // authentication successful
-            return user;
         }
 
         public Beer GetById(int userId, int beerId)
@@ -57,42 +36,16 @@ namespace WebApi.Services
             return beer;
         }
 
-        public void Update(User userParam, string password = null)
+        public void Update(Beer beerToUpdate)
         {
-            var user = _context.Users.Find(userParam.Id);
-
-            if (user == null)
-                throw new AppException("User not found");
-
-            // update username if it has changed
-            if (!string.IsNullOrWhiteSpace(userParam.Username) && userParam.Username != user.Username)
+            if (_context.Beers.Any(o => o.BeerId == beerToUpdate.BeerId))
             {
-                // throw error if the new username is already taken
-                if (_context.Users.Any(x => x.Username == userParam.Username))
-                    throw new AppException("Username " + userParam.Username + " is already taken");
-
-                user.Username = userParam.Username;
-            }
-
-            // update user properties if provided
-            if (!string.IsNullOrWhiteSpace(userParam.FirstName))
-                user.FirstName = userParam.FirstName;
-
-            if (!string.IsNullOrWhiteSpace(userParam.LastName))
-                user.LastName = userParam.LastName;
-
-            // update password if provided
-            if (!string.IsNullOrWhiteSpace(password))
+                _context.Beers.Update(beerToUpdate);
+                _context.SaveChanges();
+            } else
             {
-                byte[] passwordHash, passwordSalt;
-                CreatePasswordHash(password, out passwordHash, out passwordSalt);
-
-                user.PasswordHash = passwordHash;
-                user.PasswordSalt = passwordSalt;
+                throw new AppException("Keg is kicked.");
             }
-
-            _context.Users.Update(user);
-            _context.SaveChanges();
         }
 
         public void Delete(int id)
