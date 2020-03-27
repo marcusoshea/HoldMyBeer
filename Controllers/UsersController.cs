@@ -17,7 +17,7 @@ namespace WebApi.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("[controller]")]
+    [Route("pokeapi/[controller]")]
     public class UsersController : ControllerBase
     {
         private IUserService _userService;

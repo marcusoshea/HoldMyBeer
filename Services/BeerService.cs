@@ -9,9 +9,11 @@ namespace WebApi.Services
     public interface IBeerService
     {
         Beer GetById(int userId, int beerId);
+
+        IEnumerable<Beer> GetAll(int userId);
         Beer Add(Beer beer);
         void Update(Beer beer);
-        void Delete(int id);
+        void Delete(int beerId, int userId);
     }
 
     public class BeerService : IBeerService
@@ -25,7 +27,12 @@ namespace WebApi.Services
 
         public Beer GetById(int userId, int beerId)
         {
-            return _context.Beers.Find(beerId, userId);
+            return _context.Beers.FirstOrDefault(o => o.UserId == userId && o.BeerId == beerId);
+        }
+
+        public IEnumerable<Beer> GetAll(int userId)
+        {
+            return _context.Beers.Where(o => o.UserId == userId);
         }
 
         public Beer Add(Beer beer)
@@ -38,22 +45,24 @@ namespace WebApi.Services
 
         public void Update(Beer beerToUpdate)
         {
-            if (_context.Beers.Any(o => o.BeerId == beerToUpdate.BeerId))
+            if (_context.Beers.Any(o => o.BeerId == beerToUpdate.BeerId && o.UserId == beerToUpdate.UserId))
             {
                 _context.Beers.Update(beerToUpdate);
                 _context.SaveChanges();
-            } else
+            }
+            else
             {
                 throw new AppException("Keg is kicked.");
             }
         }
 
-        public void Delete(int id)
+        public void Delete(int beerId, int UserId)
         {
-            var user = _context.Users.Find(id);
-            if (user != null)
+            var beer = _context.Beers.FirstOrDefault(o => o.BeerId == beerId && o.UserId == UserId);
+
+            if (beer != null)
             {
-                _context.Users.Remove(user);
+                _context.Beers.Remove(beer);
                 _context.SaveChanges();
             }
         }

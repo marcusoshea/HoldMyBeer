@@ -16,7 +16,7 @@ using WebApi.Models.Beers;
 namespace WebApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("pokeapi/[controller]")]
     public class BeersController : ControllerBase
     {
         private IBeerService _beerService;
@@ -30,15 +30,23 @@ namespace WebApi.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetById(int userId, int beerId)
+        [HttpGet("{id}/{beerId}")]
+        public IActionResult GetById(int id, int beerId)
         {
-            if (User.Identity.Name != userId.ToString())
+            if (User.Identity.Name != id.ToString())
             {
                 return BadRequest(new { message = "Attempted to access a different user" });
             }
             var beer = _beerService.GetById(int.Parse(User.Identity.Name), beerId);
             var model = _mapper.Map<BeerModel>(beer);
+            return Ok(model);
+        }
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var beers = _beerService.GetAll(int.Parse(User.Identity.Name));
+            var model = _mapper.Map<IList<BeerModel>>(beers);
             return Ok(model);
         }
 
@@ -85,6 +93,7 @@ namespace WebApi.Controllers
             {
                 return BadRequest(new { message = "Attempted to update beer of wrong user" });
             }
+            beer.UserId = int.Parse(User.Identity.Name);
 
             try
             {
@@ -99,10 +108,14 @@ namespace WebApi.Controllers
             }
         }
 
-        // DELETE api/<controller>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        // DELETE api/4/5
+        [HttpDelete("{id}/{beerId}")]
+        public void Delete(int id, int beerId)
         {
+            if (User.Identity.Name == id.ToString())
+            {
+                _beerService.Delete(beerId, id);
+            }
         }
     }
 }
