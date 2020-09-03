@@ -13,6 +13,9 @@ CREATE TABLE public."Users"
     "PasswordHash" bytea,
     "PasswordSalt" bytea,
     "Username" text COLLATE pg_catalog."default" NOT NULL,
+    "ResetToken" text COLLATE pg_catalog."default",
+    "PasswordReset" date,
+    "ResetTokenExpires" date,
     CONSTRAINT "Users_pkey" PRIMARY KEY ("Id")
 )
 WITH (
