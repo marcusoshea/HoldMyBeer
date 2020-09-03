@@ -6,7 +6,6 @@ using System.Security.Cryptography;
 using WebApi.Entities;
 using WebApi.Helpers;
 
-// https://jasonwatmore.com/post/2020/07/06/aspnet-core-3-boilerplate-api-with-email-sign-up-verification-authentication-forgot-password#postman-reset-password
 
 namespace WebApi.Services
 {
