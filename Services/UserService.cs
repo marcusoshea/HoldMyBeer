@@ -1,8 +1,12 @@
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using WebApi.Entities;
 using WebApi.Helpers;
+
+// https://jasonwatmore.com/post/2020/07/06/aspnet-core-3-boilerplate-api-with-email-sign-up-verification-authentication-forgot-password#postman-reset-password
 
 namespace WebApi.Services
 {
@@ -13,15 +17,24 @@ namespace WebApi.Services
         User Create(User user, string password);
         void Update(User user, string password = null);
         void Delete(int id);
+        void ForgotPassword(Models.Accounts.ForgotPasswordRequest model, string origin);
+        void ValidateResetToken(Models.Users.ValidateResetTokenRequest model);
+        void ResetPassword(Models.Users.ResetPasswordRequest model);
     }
 
     public class UserService : IUserService
     {
         private DataContext _context;
+        private readonly AppSettings _appSettings;
+        private readonly IEmailService _emailService;
 
-        public UserService(DataContext context)
+        public UserService(DataContext context,
+            IOptions<AppSettings> appSettings,
+            IEmailService emailService)
         {
+            _appSettings = appSettings.Value;
             _context = context;
+            _emailService = emailService;
         }
 
         public User Authenticate(string username, string password)
@@ -115,6 +128,89 @@ namespace WebApi.Services
                 _context.Users.Remove(user);
                 _context.SaveChanges();
             }
+        }
+
+        private string randomTokenString()
+        {
+            using var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
+            var randomBytes = new byte[40];
+            rngCryptoServiceProvider.GetBytes(randomBytes);
+            // convert random bytes to hex string
+            return BitConverter.ToString(randomBytes).Replace("-", "");
+        }
+        public void ForgotPassword(Models.Accounts.ForgotPasswordRequest model, string origin)
+        {
+            var user = _context.Users.SingleOrDefault(x => x.Username == model.Email);
+
+            // always return ok response to prevent email enumeration
+            if (user == null) return;
+
+            // create reset token that expires after 1 day
+            user.ResetToken = randomTokenString();
+            user.ResetTokenExpires = DateTime.UtcNow.AddDays(24);
+
+            _context.Users.Update(user);
+            _context.SaveChanges();
+
+            // send email
+            sendPasswordResetEmail(user, origin);
+        }
+        public void ValidateResetToken(Models.Users.ValidateResetTokenRequest model)
+        {
+            var account = _context.Users.SingleOrDefault(x =>
+                x.ResetToken == model.Token &&
+                x.ResetTokenExpires > DateTime.UtcNow);
+
+            if (account == null)
+                throw new AppException("Invalid token");
+        }
+
+        public void ResetPassword(Models.Users.ResetPasswordRequest model)
+        {
+            var account = _context.Users.SingleOrDefault(x =>
+                x.ResetToken == model.Token &&
+                x.ResetTokenExpires > DateTime.UtcNow);
+
+            if (account == null)
+                throw new AppException("Invalid token");
+
+            // update password and remove reset token
+
+
+            byte[] passwordHash, passwordSalt;
+            CreatePasswordHash(model.Password, out passwordHash, out passwordSalt);
+
+            account.PasswordHash = passwordHash;
+            account.PasswordReset = DateTime.UtcNow;
+            account.ResetToken = null;
+            account.ResetTokenExpires = null;
+            account.PasswordSalt = passwordSalt;
+
+            _context.Users.Update(account);
+            _context.SaveChanges();
+        }
+
+        private void sendPasswordResetEmail(User account, string origin)
+        {
+            string message;
+            if (!string.IsNullOrEmpty(origin))
+            {
+                var resetUrl = $"{origin}/account/reset-password?token={account.ResetToken}";
+                message = $@"<p>Please click the below link to reset your password, the link will be valid for 1 day:</p>
+                             <p><a href=""{resetUrl}"">{resetUrl}</a></p>";
+            }
+            else
+            {
+                message = $@"<p>Please use the below token to reset your password with the <code>/accounts/reset-password</code> api route:</p>
+                             <p><code>{account.ResetToken}</code></p>";
+            }
+
+            _emailService.Send(
+                to: account.Username,
+                subject: "Sign-up Verification API - Reset Password",
+                html: $@"<h4>Reset Password Email</h4>
+                         {message}"
+            );
         }
 
         // private helper methods

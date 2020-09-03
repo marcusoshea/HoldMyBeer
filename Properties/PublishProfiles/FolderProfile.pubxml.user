@@ -6,6 +6,11 @@ by editing this MSBuild file. In order to learn more about this please visit htt
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <TimeStampOfAssociatedLegacyPublishXmlFile />
-    <_PublishTargetUrl>bin\Release\netcoreapp3.1\publish\</_PublishTargetUrl>
+    <_PublishTargetUrl>C:\Users\Marcus\Desktop\Development\HoldMyBeer\bin\Release\netcoreapp3.1\publish\</_PublishTargetUrl>
   </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="DbContext">
+      <Value>Username=postgres%3bPassword=FireAndIce2020%3bhost=54.83.230.26%3bDatabase=postgres%3bPort=5432%3b</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
 </Project>

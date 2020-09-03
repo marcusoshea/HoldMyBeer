@@ -44,3 +44,10 @@ obj
 # local sqlite db that is auto generated
 LocalDatabase.db
 *.suo
+appsettings.Development.json
+appsettings.Development.json
+appsettings.json
+Properties/PublishProfiles/FolderProfile.pubxml.user
+appsettings.Development.json
+appsettings.json
+Properties/PublishProfiles/FolderProfile.pubxml.user

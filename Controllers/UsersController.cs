@@ -88,6 +88,29 @@ namespace WebApi.Controllers
             }
         }
 
+        [AllowAnonymous]
+        [HttpPost("forgot-password")]
+        public IActionResult ForgotPassword(Models.Accounts.ForgotPasswordRequest model)
+        {
+            _userService.ForgotPassword(model, Request.Headers["origin"]);
+            return Ok(new { message = "Please check your email for password reset instructions" });
+        }
+        [AllowAnonymous]
+        [HttpPost("validate-reset-token")]
+        public IActionResult ValidateResetToken(ValidateResetTokenRequest model)
+        {
+            _userService.ValidateResetToken(model);
+            return Ok(new { message = "Token is valid" });
+        }
+        [AllowAnonymous]
+        [HttpPost("reset-password")]
+        public IActionResult ResetPassword(ResetPasswordRequest model)
+        {
+            _userService.ResetPassword(model);
+            return Ok(new { message = "Password reset successful, you can now login" });
+        }
+
+
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
