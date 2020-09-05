@@ -32,7 +32,7 @@ namespace WebApi.Services
 
         public IEnumerable<Beer> GetAll(int userId)
         {
-            return _context.Beers.Where(o => o.UserId == userId);
+            return _context.Beers.Where(o => o.UserId == userId).OrderBy(o => o.BeerName);
         }
 
         public Beer Add(Beer beer)
