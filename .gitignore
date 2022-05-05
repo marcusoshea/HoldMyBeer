@@ -53,3 +53,4 @@ appsettings.json
 Properties/PublishProfiles/FolderProfile.pubxml.user
 appsettings.json
 appsettings.Development.json
+.vs/WebApi/xs/project-cache

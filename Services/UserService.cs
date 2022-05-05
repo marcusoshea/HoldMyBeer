@@ -146,7 +146,7 @@ namespace WebApi.Services
 
             // create reset token that expires after 1 day
             user.ResetToken = randomTokenString();
-            user.ResetTokenExpires = DateTime.UtcNow.AddDays(24);
+            user.ResetTokenExpires = DateTime.UtcNow.AddHours(24);
 
             _context.Users.Update(user);
             _context.SaveChanges();
