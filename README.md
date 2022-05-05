@@ -1,5 +1,5 @@
-.Net Core API for PokeBeer api
-Requires a postgres database
+.Net Core API for PokeBeer/DrinkMe front end applications.
+Requires a postgres database (example script below for structure)
 
 -- Table: public."Users"
 
